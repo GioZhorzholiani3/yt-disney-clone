@@ -1,4 +1,9 @@
 import styled from "styled-components";
+import { auth, provider } from "../firebase";
+
+import useUserStore from "../features/userStore";
+import { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 
 const Nav = styled.nav`
   position: fixed;
@@ -13,6 +18,10 @@ const Nav = styled.nav`
   padding: 0 36px;
   letter-spacing: 16px;
   z-index: 3;
+`;
+
+const UserImg = styled.img`
+  height: 100%;
 `;
 
 const Logo = styled.a`
@@ -44,7 +53,7 @@ const NavMenu = styled.div`
   a {
     display: flex;
     align-items: center;
-    padding: 0 12px;
+    padding: 0 8px;
     cursor: pointer;
     img {
       height: 20px;
@@ -53,10 +62,9 @@ const NavMenu = styled.div`
       z-index: auto;
     }
     span {
-      margin-left: 3px;
       color: rgb(249, 249, 249);
       font-size: 13px;
-      letter-spacing: 1.42px;
+      letter-spacing: 1.4px;
       line-height: 1.08;
       padding: 2px 0px;
       white-space: nowrap;
@@ -92,18 +100,159 @@ const NavMenu = styled.div`
   }
 `;
 
+const Login = styled.a`
+  background-color: rgba(0, 0, 0, 0.6);
+  padding: 8px 16px;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  border: 1px solid #f9f9f9;
+  border-radius: 4px;
+  transition: all 0.2s ease 0s;
+  cursor: pointer;
+  &:hover {
+    background-color: #f9f9f9;
+    color: #000;
+    border-color: transparent;
+  }
+
+  @media (max-width: 768px) {
+    padding: 8px 4px;
+  }
+`;
+
+const DropDown = styled.div`
+  position: absolute;
+  top: 48px;
+  right: 0px;
+  background: rgb(19, 19, 19);
+  border: 1px solid rgba(151, 151, 151, 0.34);
+  border-radius: 4px;
+  box-shadow: rgb(0 0 0 / 50%) 0px 0px 18px 0px;
+  padding: 10px;
+  font-size: 14px;
+  letter-spacing: 3px;
+  width: 100px;
+  opacity: 0;
+`;
+
+const SignOut = styled.div`
+  position: relative;
+  height: 48px;
+  width: 48px;
+  display: flex;
+  cursor: pointer;
+  align-items: center;
+  justify-content: center;
+  ${UserImg} {
+    border-radius: 50%;
+    width: 100%;
+    height: 100%;
+  }
+
+  &:hover {
+    ${DropDown} {
+      opacity: 1;
+      transition-duration: 1s;
+    }
+  }
+`;
+
 const Header = () => {
+  const setUserLoginDetails = useUserStore(
+    (state) => state.setUserLoginDetails
+  );
+
+  const setSignOutState = useUserStore((state) => state.setSignOutState);
+
+  const name = useUserStore((state) => state.name);
+  const photo = useUserStore((state) => state.photo);
+
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    auth.onAuthStateChanged(async (user) => {
+      if (user) {
+        setUser(user);
+        navigate("/home");
+      }
+    });
+  }, [name]);
+
+  const handleAuth = () => {
+    if (!name) {
+      auth
+        .signInWithPopup(provider)
+        .then((result) => {
+          console.log(result);
+          setUser(result.user);
+        })
+        .catch((error) => {
+          alert(error.message);
+        });
+    } else if (name) {
+      auth
+        .signOut()
+        .then(() => {
+          setSignOutState();
+          navigate("/");
+        })
+        .catch((error) => {
+          alert(error.message);
+        });
+    }
+  };
+
+  const setUser = (user) => {
+    setUserLoginDetails({
+      name: user.displayName,
+      email: user.email,
+      photo: user.photoURL,
+    });
+  };
+
   return (
     <Nav>
       <Logo>
         <img src="/images/logo.svg" alt="Disney+" />
       </Logo>
-      <NavMenu>
-        <a href="/home">
-          <img src="/images/home-icon.svg" alt="HOME" />
-          <span>HOME</span>
-        </a>
-      </NavMenu>
+      {!name ? (
+        <Login onClick={handleAuth}>login</Login>
+      ) : (
+        <>
+          <NavMenu>
+            <a href="/home">
+              <img src="/images/home-icon.svg" alt="HOME" />
+              <span>HOME</span>
+            </a>
+            <a>
+              <img src="/images/search-icon.svg" alt="SEARCH" />
+              <span>SEARCH</span>
+            </a>
+            <a>
+              <img src="/images/watchlist-icon.svg" alt="WATCH" />
+              <span>WATCHLIST</span>
+            </a>
+            <a>
+              <img src="/images/original-icon.svg" alt="ORIGINALS" />
+              <span>ORIGINALS</span>
+            </a>
+            <a>
+              <img src="/images/movie-icon.svg" alt="MOVIES" />
+              <span>MOVIES</span>
+            </a>
+            <a>
+              <img src="/images/series-icon.svg" alt="SERIES" />
+              <span>SERIES</span>
+            </a>
+          </NavMenu>
+          <SignOut>
+            <UserImg src={photo} alt={name} />
+            <DropDown>
+              <span onClick={handleAuth}>Sign out</span>
+            </DropDown>
+          </SignOut>
+        </>
+      )}
     </Nav>
   );
 };
