@@ -1,6 +1,8 @@
 import styled from "styled-components";
 import { Link } from "react-router-dom";
 
+import useMovieStore, { selectNewDisney } from "../features/moviesStore";
+
 const Container = styled.section`
   padding: 0 0 26px;
   display: flex;
@@ -52,30 +54,22 @@ const Wrap = styled.div`
 `;
 
 const DisneyPlus = () => {
+  const movies = useMovieStore(selectNewDisney);
+  console.log("New Disney", movies);
+
   return (
     <Container>
       <h4>Disney+</h4>
       <Content>
-        <Wrap>
-          <Link to="/">
-            <img src="/images/viewers-disney.png" alt="disney" />
-          </Link>
-        </Wrap>
-        <Wrap>
-          <Link to="/">
-            <img src="/images/viewers-disney.png" alt="disney" />
-          </Link>
-        </Wrap>
-        <Wrap>
-          <Link to="/">
-            <img src="/images/viewers-disney.png" alt="disney" />
-          </Link>
-        </Wrap>
-        <Wrap>
-          <Link to="/">
-            <img src="/images/viewers-disney.png" alt="disney" />
-          </Link>
-        </Wrap>
+        {movies &&
+          movies.map((movie, key) => (
+            <Wrap key={key}>
+              {movie.id}
+              <Link to={`/detail/` + movie.id}>
+                <img src={movie.cardImg} alt={movie.title} />
+              </Link>
+            </Wrap>
+          ))}
       </Content>
     </Container>
   );

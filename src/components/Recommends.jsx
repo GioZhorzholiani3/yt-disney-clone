@@ -1,5 +1,6 @@
 import styled from "styled-components";
 import { Link } from "react-router-dom";
+import useMovieStore, { selectRecommend } from "../features/moviesStore";
 
 const Container = styled.section`
   padding: 0 0 26px;
@@ -52,30 +53,22 @@ const Wrap = styled.div`
 `;
 
 const Recommends = () => {
+  const movies = useMovieStore(selectRecommend);
+  console.log("recommended", movies);
+
   return (
     <Container>
       <h4>Recommended for You</h4>
       <Content>
-        <Wrap>
-          <Link to="/">
-            <img src="/images/viewers-disney.png" alt="disney" />
-          </Link>
-        </Wrap>
-        <Wrap>
-          <Link to="/">
-            <img src="/images/viewers-disney.png" alt="disney" />
-          </Link>
-        </Wrap>
-        <Wrap>
-          <Link to="/">
-            <img src="/images/viewers-disney.png" alt="disney" />
-          </Link>
-        </Wrap>
-        <Wrap>
-          <Link to="/">
-            <img src="/images/viewers-disney.png" alt="disney" />
-          </Link>
-        </Wrap>
+        {movies &&
+          movies.map((movie, key) => (
+            <Wrap key={key}>
+              {movie.id}
+              <Link to={`/detail/` + movie.id}>
+                <img src={movie.cardImg} alt={movie.title} />
+              </Link>
+            </Wrap>
+          ))}
       </Content>
     </Container>
   );

@@ -6,10 +6,11 @@ const useMovieStore = create((set) => ({
   original: null,
   trending: null,
   setMovies: (movies) => set(() => ({ ...movies })),
-  selectRecommend: (state) => state.recommend,
-  selectNewDisney: (state) => state.newDisney,
-  selectOriginal: (state) => state.original,
-  selectTrending: (state) => state.trending,
 }));
+
+export const selectRecommend = (state) => state.recommend;
+export const selectNewDisney = (state) => state.newDisney;
+export const selectOriginal = (state) => state.original;
+export const selectTrending = (state) => state.trending;
 
 export default useMovieStore;
