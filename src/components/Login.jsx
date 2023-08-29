@@ -83,7 +83,7 @@ const CTALogoTwo = styled.img`
   width: 100%;
 `;
 
-const Login = (props) => {
+const Login = () => {
   return (
     <Container>
       <Content>
